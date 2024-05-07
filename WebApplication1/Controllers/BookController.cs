@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using WebApplication1.Models.DTOs;
 using WebApplication1.Repositories;
 namespace WebApplication1.Controllers;
 
@@ -6,7 +7,7 @@ namespace WebApplication1.Controllers;
 public class BookController : ControllerBase
 {
     private readonly IBookRepository _bookRepository;
-    public BookController(BookRepository bookRepository)
+    public BookController(IBookRepository bookRepository)
     {
         _bookRepository = bookRepository;
     }
@@ -21,6 +22,14 @@ public class BookController : ControllerBase
             
         return Ok(authors);
     }
-    
-    public 
+
+    [HttpGet("api/books")]
+    public async Task<IActionResult> addBook(BookDTO bookDto)
+    {
+        if (!await _bookRepository.DoesBookExists(bookDto.id))
+            return NotFound($"Book with given ID - {bookDto.id} doesn't exist");
+        var x =_bookRepository.addBook(bookDto);
+        return Ok();
+    } 
+ 
 }

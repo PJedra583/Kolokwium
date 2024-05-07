@@ -1,4 +1,5 @@
 using System.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using WebApplication1.Models;
 using WebApplication1.Models.DTOs;
@@ -65,4 +66,43 @@ public class BookRepository : IBookRepository
 	    
         return bookDto;
     }
+
+    public async Task<bool> addBook(BookDTO bookDto)
+    {
+	    var query = "Insert into books values (@ID,@TITLE)";
+	    
+	    await using SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("Default"));
+	    await using SqlCommand command = new SqlCommand();
+
+	    command.Connection = connection;
+	    command.CommandText = query;
+	    command.Parameters.AddWithValue("@ID", bookDto.id);
+	    command.Parameters.AddWithValue("@TITLE", bookDto.title);
+	    
+	    await connection.OpenAsync();
+
+	    var x = await command.ExecuteNonQueryAsync();
+
+	    foreach(Author a in bookDto.authors)
+	    {
+		    command.Parameters.Clear();
+		    query = "Insert into authors values (@PK,@First_name,@Last_name) ";
+		    command.CommandText = query;
+		    command.Parameters.AddWithValue("@PK", a.id);
+		    command.Parameters.AddWithValue("@First_name", a.firstname);
+		    command.Parameters.AddWithValue("@Last_name", a.lastname);
+		    
+		    x = await command.ExecuteNonQueryAsync();
+		    
+		    query = "Insert into books_authors values (@FK_BOOK,@FK_AUTHOR) ";
+		    command.CommandText = query;
+		    command.Parameters.AddWithValue("@FK_BOOK", bookDto.id);
+		    command.Parameters.AddWithValue("@FK_AUTHOR", a.id);
+			
+		    x = await command.ExecuteNonQueryAsync();
+
+	    }
+	    return true;
+    }
+
 }
