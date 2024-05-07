@@ -17,8 +17,10 @@ public class BookController : ControllerBase
         if (!await _bookRepository.DoesBookExists(id))
             return NotFound($"Book with given ID - {id} doesn't exist");
 
-        var animal = await _bookRepository.GetAuthors(id);
+        var authors = await _bookRepository.GetAuthors(id);
             
-        return Ok(animal);
+        return Ok(authors);
     }
+    
+    public 
 }
